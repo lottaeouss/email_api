@@ -30,9 +30,12 @@ class EmailServiceTest {
     @MockBean
     private EmailRepository emailRepository;
 
+    @MockBean
+    private EmailServerService emailServerService;
+
     @BeforeEach
     void setup() {
-        emailService = new EmailService(emailRepository);
+        emailService = new EmailService(emailRepository, emailServerService);
     }
 
     @Test
@@ -62,6 +65,29 @@ class EmailServiceTest {
         verify(emailRepository).getEmailsByUserId(any(UUID.class));
         assertThat(actual).hasSameSizeAs(searchResponse);
         assertThat(actual).isEqualTo(searchResponse);
+    }
+
+    @Test
+    public void testSendEmail() {
+        Email email = new Email();
+        email.setSender("test_sender_one@test.com");
+        email.setRecipients(List.of("test_recipient@test.com"));
+        email.setSubject("test email subject one");
+        email.setBody("test email body one");
+
+        Email sentEmail = new Email();
+        sentEmail.setSender("test_sender_one@test.com");
+        sentEmail.setRecipients(List.of("test_recipient@test.com"));
+        sentEmail.setSubject("test email subject one");
+        sentEmail.setBody("test email body one");
+        sentEmail.setId(randomUUID());
+        sentEmail.setCreatedOn(now());
+        sentEmail.setModifiedOn(now());
+
+        when(emailServerService.sendEmail(any(UUID.class), any(Email.class))).thenReturn(sentEmail);
+        Email actual = emailService.sendEmail(randomUUID(), email);
+        verify(emailServerService).sendEmail(any(UUID.class), any(Email.class));
+        assertThat(actual).isEqualTo(sentEmail);
     }
 
 }

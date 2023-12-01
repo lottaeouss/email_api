@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public class EmailRepository {
+
     private final Map<UUID, List<Email>> userEmailMap = new ConcurrentHashMap<>();
 
     public List<Email> getEmailsByUserId(UUID userId) {
