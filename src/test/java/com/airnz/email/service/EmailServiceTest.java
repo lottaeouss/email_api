@@ -40,31 +40,19 @@ class EmailServiceTest {
 
     @Test
     public void testGetAllEmails() {
-        Email defaultEmailOne = new Email();
-        defaultEmailOne.setId(randomUUID());
-        defaultEmailOne.setSender("test_sender_one@test.com");
-        defaultEmailOne.setRecipients(List.of("test_recipient@test.com"));
-        defaultEmailOne.setSubject("test email subject one");
-        defaultEmailOne.setBody("test email body one");
-        defaultEmailOne.setCreatedOn(now());
-        defaultEmailOne.setModifiedOn(now());
+        Email defaultEmail = new Email();
+        defaultEmail.setId(randomUUID());
+        defaultEmail.setSender("test_sender_one@test.com");
+        defaultEmail.setRecipients(List.of("test_recipient@test.com"));
+        defaultEmail.setSubject("test email subject");
+        defaultEmail.setBody("test email body");
+        defaultEmail.setCreatedOn(now());
+        defaultEmail.setModifiedOn(now());
 
-        Email defaultEmailTwo = new Email();
-        defaultEmailTwo.setId(randomUUID());
-        defaultEmailTwo.setSender("test_sender_two@test.com");
-        defaultEmailTwo.setRecipients(List.of("test_recipient@test.com"));
-        defaultEmailTwo.setSubject("test email subject two");
-        defaultEmailTwo.setBody("test email body two");
-        defaultEmailTwo.setCreatedOn(now());
-        defaultEmailTwo.setModifiedOn(now());
-
-        List<Email> searchResponse = List.of(defaultEmailOne, defaultEmailTwo);
-
-        when(emailRepository.getEmailsByUserId(any(UUID.class))).thenReturn(searchResponse);
-        List<Email> actual = emailService.getEmailsByUserId(randomUUID());
-        verify(emailRepository).getEmailsByUserId(any(UUID.class));
-        assertThat(actual).hasSameSizeAs(searchResponse);
-        assertThat(actual).isEqualTo(searchResponse);
+        when(emailRepository.getEmailByIdAndUserId(any(UUID.class), any(UUID.class))).thenReturn(defaultEmail);
+        Email actual = emailService.getEmailByIdAndUserId(randomUUID(), randomUUID());
+        verify(emailRepository).getEmailByIdAndUserId(any(UUID.class), any(UUID.class));
+        assertThat(actual).isEqualTo(defaultEmail);
     }
 
     @Test

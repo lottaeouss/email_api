@@ -1,9 +1,9 @@
 package com.airnz.email.respository;
 
 import static java.time.Instant.now;
-import static java.util.UUID.randomUUID;
 
 import com.airnz.email.model.Email;
+import com.airnz.email.rest.exception.ResourceNotFoundException;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -13,35 +13,45 @@ import org.springframework.stereotype.Repository;
 @Repository
 public class EmailRepository {
 
-    private final Map<UUID, List<Email>> userEmailMap = new ConcurrentHashMap<>();
+    private final Map<String, Email> emailIdMap = loadHardCodedData();
 
-    public List<Email> getEmailsByUserId(UUID userId) {
-        if (!userEmailMap.containsKey(userId)) {
-            return getDefaultEmailList();
+    private Map<String, Email> loadHardCodedData() {
+        Map<String, Email> emailIdMap = new ConcurrentHashMap<>();
+        UUID defaultUserId = UUID.fromString("e711f133-ab0c-483e-8507-81416745c78e");
+        UUID defaultEmailIdOne = UUID.fromString("3302f3b6-3c87-49f2-b397-fb2131041b15");
+        UUID defaultEmailIdTwo = UUID.fromString("b2a2c0be-2ff8-484f-951e-53e6c81dcf69");
+
+        List<UUID> defaultEmails = List.of(defaultEmailIdOne, defaultEmailIdTwo);
+
+        for (UUID emailId : defaultEmails) {
+            emailIdMap.put(buildKey(defaultUserId, emailId), buildDefaultEmail(emailId));
         }
-        return userEmailMap.get(userId);
+
+        return emailIdMap;
     }
 
-    private List<Email> getDefaultEmailList() {
+    private String buildKey(UUID userId, UUID emailId) {
+        return userId.toString() + "#" + emailId.toString();
+    }
+
+    public Email getEmailByIdAndUserId(UUID userId, UUID emailId) {
+        String key = buildKey(userId, emailId);
+        if (emailIdMap.containsKey(key)) {
+            return emailIdMap.get(key);
+        }
+        throw new ResourceNotFoundException();
+    }
+
+    private Email buildDefaultEmail(UUID id) {
         Email defaultEmailOne = new Email();
-        defaultEmailOne.setId(randomUUID());
+        defaultEmailOne.setId(id);
         defaultEmailOne.setSender("test_sender_one@test.com");
         defaultEmailOne.setRecipients(List.of("test_recipient@test.com"));
-        defaultEmailOne.setSubject("test email subject one");
-        defaultEmailOne.setBody("test email body one");
+        defaultEmailOne.setSubject("test email subject");
+        defaultEmailOne.setBody("test email body");
         defaultEmailOne.setCreatedOn(now());
         defaultEmailOne.setModifiedOn(now());
-
-        Email defaultEmailTwo = new Email();
-        defaultEmailTwo.setId(randomUUID());
-        defaultEmailTwo.setSender("test_sender_two@test.com");
-        defaultEmailTwo.setRecipients(List.of("test_recipient@test.com"));
-        defaultEmailTwo.setSubject("test email subject two");
-        defaultEmailTwo.setBody("test email body two");
-        defaultEmailTwo.setCreatedOn(now());
-        defaultEmailTwo.setModifiedOn(now());
-
-        return List.of(defaultEmailOne, defaultEmailTwo);
+        return defaultEmailOne;
     }
 
 }

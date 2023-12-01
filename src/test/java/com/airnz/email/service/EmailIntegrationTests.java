@@ -38,24 +38,33 @@ public class EmailIntegrationTests {
     private MockMvc mockMvc;
 
     @Autowired
-    private JacksonTester<Email> createResponse;
+    private JacksonTester<Email> response;
 
-    @Autowired
-    private JacksonTester<List<Email>> getResponse;
+    private final UUID defaultUserId = UUID.fromString("e711f133-ab0c-483e-8507-81416745c78e");
 
     @Test
-    void testGetEmailForUser() throws Exception {
-        UUID userId = randomUUID();
-        MvcResult result = mockMvc.perform(get(basePath + "/users/{userId}/emails", userId))
+    void testGetValidEmailForUser() throws Exception {
+        UUID defaultEmailIdOne = UUID.fromString("3302f3b6-3c87-49f2-b397-fb2131041b15");
+        MvcResult result = mockMvc.perform(
+                get(basePath + "/users/{userId}/emails/{emailId}", defaultUserId, defaultEmailIdOne))
             .andExpect(status().isOk())
             .andExpect(content().contentType(APPLICATION_JSON))
             .andReturn();
 
-        List<Email> actual = getResponse.parse(result.getResponse().getContentAsString()).getObject();
+        Email actual = response.parse(result.getResponse().getContentAsString()).getObject();
 
         assertAll(
-            () -> assertThat(actual.size()).isEqualTo(2)
+            () -> assertThat(actual.getId()).isEqualTo(defaultEmailIdOne)
         );
+    }
+
+    @Test
+    void testGetInvalidEmailForUserIsNotFound() throws Exception {
+        UUID userId = UUID.fromString("e711f133-ab0c-483e-8507-81416745c78e");
+        mockMvc.perform(
+                get(basePath + "/users/{userId}/emails/{emailId}", userId, randomUUID()))
+            .andExpect(status().isNotFound())
+            .andReturn();
     }
 
     @Test
@@ -66,15 +75,14 @@ public class EmailIntegrationTests {
         email.setSubject("test email subject one");
         email.setBody("test email body one");
 
-        UUID userId = randomUUID();
-        MvcResult result = mockMvc.perform(post(basePath + "/users/{userId}/send-email", userId)
+        MvcResult result = mockMvc.perform(post(basePath + "/users/{userId}/send-email", defaultUserId)
                 .contentType(APPLICATION_JSON)
-                .content(createResponse.write(email).getJson()))
+                .content(response.write(email).getJson()))
             .andExpect(status().isCreated())
             .andExpect(content().contentType(APPLICATION_JSON))
             .andReturn();
 
-        Email actual = createResponse.parse(result.getResponse().getContentAsString()).getObject();
+        Email actual = response.parse(result.getResponse().getContentAsString()).getObject();
 
         assertAll(
             () -> assertThat(actual.getId()).isNotNull(),
@@ -96,7 +104,7 @@ public class EmailIntegrationTests {
         UUID userId = randomUUID();
         mockMvc.perform(post(basePath + "/users/{userId}/send-email", userId)
                 .contentType(APPLICATION_JSON)
-                .content(createResponse.write(email).getJson()))
+                .content(response.write(email).getJson()))
             .andExpect(status().isBadRequest())
             .andReturn();
 

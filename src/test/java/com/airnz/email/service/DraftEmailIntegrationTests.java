@@ -47,7 +47,7 @@ public class DraftEmailIntegrationTests {
         draftEmail.setSubject("test email subject one");
         draftEmail.setBody("test email body one");
 
-        UUID userId = randomUUID();
+        UUID userId = UUID.fromString("e711f133-ab0c-483e-8507-81416745c78e");
         MvcResult result = mockMvc.perform(post(basePath + "/users/{userId}/draft-email", userId)
                 .contentType(APPLICATION_JSON)
                 .content(createResponse.write(draftEmail).getJson()))
@@ -65,5 +65,20 @@ public class DraftEmailIntegrationTests {
             () -> assertThat(actual.getBody()).isEqualTo(draftEmail.getBody()),
             () -> assertThat(actual.getCreatedOn()).isNotNull(),
             () -> assertThat(actual.getModifiedOn()).isNotNull());
+    }
+
+    @Test
+    void testSendDraftEmailUserIsNotFound() throws Exception {
+        DraftEmail draftEmail = new DraftEmail();
+        draftEmail.setSender("test_sender_one@test.com");
+        draftEmail.setRecipients(List.of("test_recipient@test.com"));
+        draftEmail.setSubject("test email subject one");
+        draftEmail.setBody("test email body one");
+
+        mockMvc.perform(post(basePath + "/users/{userId}/draft-email", randomUUID())
+                .contentType(APPLICATION_JSON)
+                .content(createResponse.write(draftEmail).getJson()))
+            .andExpect(status().isNotFound())
+            .andReturn();
     }
 }
