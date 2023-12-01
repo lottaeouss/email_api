@@ -1,4 +1,4 @@
-package com.airnz.email.service;
+package com.airnz.email.integration;
 
 import static java.util.UUID.randomUUID;
 import static org.assertj.core.api.Assertions.assertThat;
