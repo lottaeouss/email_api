@@ -29,7 +29,6 @@ public class EmailService {
         email.setId(randomUUID());
         email.setCreatedOn(now());
         email.setModifiedOn(now());
-        System.out.println("email sent, userId=" + userId);
         return this.emailServerService.sendEmail(userId, email);
     }
 
