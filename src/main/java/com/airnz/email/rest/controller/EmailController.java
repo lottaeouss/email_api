@@ -1,7 +1,7 @@
 package com.airnz.email.rest.controller;
 
 import com.airnz.email.model.Email;
-import com.airnz.email.model.OnCreate;
+import com.airnz.email.model.EmailOnCreate;
 import com.airnz.email.service.EmailService;
 import com.airnz.email.service.UserService;
 import java.util.UUID;
@@ -42,7 +42,7 @@ public class EmailController {
     @PostMapping("/users/{userId}/send-email")
     @ResponseStatus(HttpStatus.CREATED)
     public Email sendEmail(@PathVariable(name = "userId") UUID userId,
-        @Validated(OnCreate.class) @RequestBody Email email) {
+        @Validated(EmailOnCreate.class) @RequestBody Email email) {
         this.userService.checkUserExists(userId);
         return emailService.sendEmail(userId, email);
     }

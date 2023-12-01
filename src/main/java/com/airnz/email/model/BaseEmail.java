@@ -1,6 +1,5 @@
 package com.airnz.email.model;
 
-import jakarta.validation.constraints.NotNull;
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
@@ -10,10 +9,8 @@ public class BaseEmail {
 
     private UUID id;
 
-    @NotNull(groups = {OnCreate.class})
     private String sender;
 
-    @NotNull(groups = {OnCreate.class})
     private List<String> recipients;
     private List<String> ccRecipients;
     private List<String> bccRecipients;
